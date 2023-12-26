@@ -28,6 +28,8 @@ export default function Homepage() {
       theme: "outline",
       size: "large",
     });
+
+    google.accounts.id.prompt();
   }, []);
 
   return (
