@@ -1,20 +1,35 @@
 import React, { useEffect, useState } from "react";
-import { jwtDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Corrected import
+import Foo from "../Foo/Fooelement";
+import { Outlet } from "react-router";
 
 export default function Homepage() {
+  const win = window.sessionStorage;
   const [user, setUser] = useState({});
+  const [showSignIn, setShowSignIn] = useState(!win.getItem("token")); // Show if no token
+
+  useEffect(() => {
+    if (win.getItem("token")) {
+      console.log("Token exists: ", win.getItem("token"));
+      const userObject = jwtDecode(win.getItem("token"));
+      setUser(userObject);
+      setShowSignIn(false); // Hide signIn button
+    }
+  }, []);
 
   function handleCallbackResponse(response) {
     console.log("token: ", response.credential);
-    var UserObject = jwtDecode(response.credential);
+    const UserObject = jwtDecode(response.credential);
     console.log(UserObject);
     setUser(UserObject);
-    document.getElementById("signIn").hidden = true;
+    win.setItem("token", response.credential);
+    setShowSignIn(false); // Hide signIn button
   }
 
-  function handleSignOut(e) {
+  function handleSignOut() {
     setUser({});
-    document.getElementById("signIn").hidden = false;
+    win.clear();
+    setShowSignIn(true); // Show signIn button
   }
 
   useEffect(() => {
@@ -24,28 +39,40 @@ export default function Homepage() {
         "417041141509-495v48nc29snmejlojgaj49pq8ck3ukn.apps.googleusercontent.com",
       callback: handleCallbackResponse,
     });
-    google.accounts.id.renderButton(document.getElementById("signIn"), {
-      theme: "outline",
-      size: "large",
-    });
 
-    google.accounts.id.prompt();
-  }, []);
+    if (showSignIn) {
+      google.accounts.id.renderButton(document.getElementById("signIn"), {
+        theme: "outline",
+        size: "large",
+      });
+
+      google.accounts.id.prompt();
+    }
+  }, [showSignIn]);
 
   return (
     <>
-      <div id="signIn"></div>
-      {
-        Object.keys(user).length !== 0 && <button onClick={(e) => handleSignOut(e)}>Sign Out</button>
-      }
-
-      
-      {user && 
+      {showSignIn && (
         <div>
-          <h3> {user.name} {user.email}</h3>
-          <img src={user.picture}></img>
+          <h1>Home</h1>
+          <h2>Página de lógin</h2>
+          <div id="signIn"></div>
         </div>
-      }
+      )}
+
+      {Object.keys(user).length !== 0 && (
+        <>
+          <div>
+            <h1>Página hija</h1>
+            <h3>
+              {user.name} {user.email}
+            </h3>
+            <Outlet />
+            <img src={user.picture} alt="User" />
+            <button onClick={handleSignOut}>Sign Out</button>
+          </div>
+        </>
+      )}
     </>
   );
 }
