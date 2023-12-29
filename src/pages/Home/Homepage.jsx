@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { jwtDecode } from "jwt-decode"; // Corrected import
-import Foo from "../Foo/Fooelement";
 import { Outlet } from "react-router";
+import { Button, Paper, Typography, TextField, Box } from "@mui/material";
 
 export default function Homepage() {
   const win = window.sessionStorage;
@@ -56,7 +56,7 @@ export default function Homepage() {
         <div>
           <h1>Home</h1>
           <h2>Página de lógin</h2>
-          <div id="signIn"></div>
+          <Button id="signIn"> </Button>
         </div>
       )}
 
